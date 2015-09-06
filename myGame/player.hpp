@@ -11,7 +11,6 @@ class bot{
 	vector<pair<int,int> > tilePos; //The position of tiles.
 	bool order; //Whether order or chaos
 	int maxdepth; //The max depth to which we can go(0,maxdepth), both inclusive.
-	vector<char> validColors;
 	int totaltilesleft; // number of tiles left
 	char tileToMinNode;
 public:
@@ -48,16 +47,15 @@ public:
 		else if(state == 1){
 			// This is chance node
 			float expectedvalue = 0.0;
-			for(int i=0;i<validColors.size();i++){
-				int idx = validColors[i] - 65;
-				float prob = float(colors[idx]) / totaltilesleft;
-				colors[idx]--;
+			for(int i=0;i<5;i++){
+				float prob = float(colors[i]) / totaltilesleft;
+				colors[i]--;
 				totaltilesleft--;
-				tileToMinNode = validColors[i];
+				tileToMinNode = 65+i; //given color.
 				int localstate = state;
 				state = (state + 1)%3;
 				expectedvalue += prob*expectiminimax(state,depth+1);
-				colors[idx]++;
+				colors[i]++;
 				totaltilesleft++;
 			}
 			return expectedvalue;

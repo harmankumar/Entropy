@@ -1,10 +1,14 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
-#include <iostream>
-#include <vector>
+#include <bits/stdc++.h>
+
+#define INF numeric_limits<float>::max
+#define MINF numeric_limits<float>::min
+
 using namespace std;
 
-class bot{
+class bot
+{
 	int sizeOfBoard;
 	vector<vector<char> > board; // The board
 	vector<int> colors; // Number of tiles left of valid colors
@@ -13,8 +17,10 @@ class bot{
 	int maxdepth; //The max depth to which we can go(0,maxdepth), both inclusive.
 	int totaltilesleft; // number of tiles left
 	char tileToMinNode;
+
 public:
-	bot(int n,bool ord):board(n,vector<char>(n,'')){
+	bot(int n , bool ord):board(n,vector<char>(n,''))
+	{
 		order = ord;
 		sizeOfBoard = n;
 		colors.resize(26,0);
@@ -22,11 +28,13 @@ public:
 		totaltilesleft = 25;
 		tileToMinNode = '';
 	}
-	float expectiminimax(int state, int depth){
+	float expectiminimax(int state, int depth)
+	{
+		// In this strategy aggressive gameplay etc. have not been taken into account, to be added in case time permits.
 		if(depth == maxdepth)
 			return utilityFunction();
 		if(state == 0){ 
-			float globalmax = -50000.0;
+			float globalmax = MINF;
 			// This is max node
 			for(int i = 0;i<tilePos.size();i++){
 				// for valid movements of tile on board{
@@ -80,7 +88,8 @@ public:
 			return globalmin;
 		}
 	}	
-	float utilityFunction(){
+	float utilityFunction()
+	{
 		// DO SOME MAGIC HERE
 		return 0.0;
 	}

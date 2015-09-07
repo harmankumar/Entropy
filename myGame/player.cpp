@@ -199,6 +199,7 @@ float bot::expectiminimax(int state, int depth){
 			score+=scoreDelta;
 			board[row][col] = tileToMinNode;
 			unvisited_cells.erase(n*row + col);
+			tilePos.push_back(make_pair(row,col));
 
 			int localstate = state;
 			state = (state+1)%3;	
@@ -208,6 +209,7 @@ float bot::expectiminimax(int state, int depth){
 			board[row][col] = 'W';
 			unvisited_cells.insert(n*row + col);
 			score-=scoreDelta;
+			tilePos.pop_back();
 			
 			if(localmin < globalmin){
 				localmin = globalmin;

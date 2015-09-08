@@ -1,15 +1,44 @@
 #ifndef PLAYER_HPP
 #define PLAYER_HPP
-#include <bits/stdc++.h>
-
-#define INF numeric_limits<float>::max
-#define MINF numeric_limits<float>::min
-
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <unordered_set>
+#include <limits>
 using namespace std;
 
-class bot
-{
-	int sizeOfBoard;
+#define INF numeric_limits<float>::max()
+#define MINF numeric_limits<float>::min()
+
+struct triple{
+	float score;int row;int column;
+	triple(float a,int b,int c){
+		score = a;row = b;column = c;
+	}
+	void print(){
+		printf("%f %d %d\n",score,row,column);
+	}
+};
+
+
+struct comparator_structure{
+	bool operator()(triple* a,triple* b){
+		if(a && b){
+			if(a->score > b->score)
+				return true;
+			else
+				return false;
+		}
+		else{
+			printf("Either one of the values is null. Check \n");
+			return false;
+		}
+	}
+};
+
+
+class bot{
+	int n;
 	vector<vector<char> > board; // The board
 	vector<int> colors; // Number of tiles left of valid colors
 	vector<pair<int,int> > tilePos; //The position of tiles.
@@ -17,82 +46,39 @@ class bot
 	int maxdepth; //The max depth to which we can go(0,maxdepth), both inclusive.
 	int totaltilesleft; // number of tiles left
 	char tileToMinNode;
+	int score;
+	unordered_set<int> unvisited_cells;
+	comparator_structure comparison;
+	void setScore(){
+	// TODO: RESET SCORE	
+	}
+	
+	//Book keeping for maintaining actions
+	
+	//Order
+	int initx,inity,finx,finy;
+	
+	//Chaos
+	char tilecolor;
+	int posx,posy;
 
 public:
-	bot(int n , bool ord):board(n,vector<char>(n,''))
-	{
-		order = ord;
-		sizeOfBoard = n;
-		colors.resize(26,0);
+	
+	bot(int n,bool ord):board(n,vector<char>(n,'W')){
+		order = ord; // Unnecessary ? 
+		this->n = n;
+		colors.resize(n,n);
 		maxdepth = 3; // Vary this to get different depths.
 		totaltilesleft = 25;
-		tileToMinNode = '';
+		tileToMinNode = 'W';
+		score = 0;
+		initx=inity=finx=finy = posx=posy = -1;
+		for(int i=0;i<n*n;i++)
+			unvisited_cells.insert(i);
 	}
-	float expectiminimax(int state, int depth)
-	{
-		// In this strategy aggressive gameplay etc. have not been taken into account, to be added in case time permits.
-		if(depth == maxdepth)
-			return utilityFunction();
-		if(state == 0){ 
-			float globalmax = MINF;
-			// This is max node
-			for(int i = 0;i<tilePos.size();i++){
-				// for valid movements of tile on board{
-					// make movement
-					int localstate = state;
-					state  = (state + 1)%3;
-					float tempval = expectiminimax(state,depth+1);
-					state = localstate;
-					if(tempval > globalmax){
-						globalmax = tempval;
-						// Store action that lead to this state
-					}
-					//Restore board
-					//}
-			}
-			return globalmax;
-		}
-		else if(state == 1){
-			// This is chance node
-			float expectedvalue = 0.0;
-			for(int i=0;i<5;i++){
-				float prob = float(colors[i]) / totaltilesleft;
-				colors[i]--;
-				totaltilesleft--;
-				tileToMinNode = 65+i; //given color.
-				int localstate = state;
-				state = (state + 1)%3;
-				expectedvalue += prob*expectiminimax(state,depth+1);
-				colors[i]++;
-				totaltilesleft++;
-			}
-			return expectedvalue;
-
-		}
-		else{
-			//This is min node
-			float globalmin = 50000.0;
-			//for valid moves of min nodes with tileToMinNode{
-				//make movement
-				int localstate = state;
-				state = (state+1)%3;	
-				float localmin = expectiminimax(state,depth+1);
-				state = localstate;
-				if(localmin < globalmin){
-					localmin = globalmin;
-					//Store action to this state
-				}
-				//Restore board
-
-			//}
-			return globalmin;
-		}
-	}	
-	float utilityFunction()
-	{
-		// DO SOME MAGIC HERE
-		return 0.0;
-	}
+	
+	float expectiminimax(int state,int depth);	
+	float utilityFunction();
 	void playAsOrder(char TileUsedByChaos,int row,int col);
 	void playAsChaos(char TileColorGiven);
 };

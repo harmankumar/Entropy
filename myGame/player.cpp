@@ -14,6 +14,9 @@ void bot::playAsOrder(char TileUsedByChaos,int row,int col){
 	board[row][col] = TileUsedByChaos;
 	unvisited_cells.erase(n*row + col);
 	tilePos.push_back(make_pair(row,col));
+	int idx = TileUsedByChaos - 65;
+	colors[idx]--;
+	totaltilesleft--;
 	//TODO: UPDATE SCORE 
 	float dummy = expectiminimax(0,0);
 	printf("%d %d %d %d\n",initx,inity,finx,finy);

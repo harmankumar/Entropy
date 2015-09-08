@@ -1,4 +1,7 @@
-#include <bits/stdc++.h>
+#include <iostream>
+#include <vector>
+#include <string>
+
 
 using namespace std;
 
@@ -25,7 +28,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 		return difference;
 
 	if( (yfin != yini) && (xfin != xini))	// Not a Possible move
-		return -1;
+		return 50000;
 
 	if(yfin == yini)	// Movement in a column.
 	{
@@ -84,8 +87,9 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 
 		// Value Added.	
 		// Odd Pal.
-
-		board[xfin][yfin] = color;
+		return difference;
+		
+		/*board[xfin][yfin] = color;
 		// i = yfin;
 		j = 1;
 
@@ -215,7 +219,8 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 			difference += sumup;
 		}
 
-		board[xfin][yfin] = 'W';
+		board[xfin][yfin] = 'W';*/
+
 
 	}
 
@@ -416,8 +421,13 @@ int main()
 {
 	boardsize = 5;
 	// Init the board
-
-	//	cout<<diff( , , , , B);
+	for(int i=0;i<5;i++){
+		for(int j=0;j<5;j++)
+			board[i][j] = 'W';
+	}
+	board[1][2] = board[1][4] = 'B';
+	board[3][1] = board[3][2] = board[3][3] = board[3][4] = 'B';
+	cout<<diff(3,3,1,3,'B');
 
 	return 0;
 }

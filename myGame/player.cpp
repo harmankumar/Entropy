@@ -14,6 +14,9 @@ void bot::playAsOrder(char TileUsedByChaos,int row,int col){
 	board[row][col] = TileUsedByChaos;
 	unvisited_cells.erase(n*row + col);
 	tilePos.push_back(make_pair(row,col));
+	int idx = TileUsedByChaos - 65;
+	colors[idx]--;
+	totaltilesleft--;
 	//TODO: UPDATE SCORE 
 	float dummy = expectiminimax(0,0);
 	printf("%d %d %d %d\n",initx,inity,finx,finy);
@@ -49,7 +52,7 @@ float bot::expectiminimax(int state, int depth){
 				
 				if(column + i < n && board[row][column+i] == 'W' && !stop_one){
 
-					//setScoreDelta 
+					//TODO: setScoreDelta 
 					float scoreDelta;
 					score_movements.push_back(new triple(scoreDelta,row,column+i));
 					
@@ -59,7 +62,7 @@ float bot::expectiminimax(int state, int depth){
 				}
 				if(column - i >= 0 && board[row][column - i] == 'W' && !stop_two){
 					
-					//setScoreDelta
+					//TODO: setScoreDelta
 					float scoreDelta;
 					score_movements.push_back(new triple(scoreDelta,row,column-i));
 					
@@ -78,7 +81,7 @@ float bot::expectiminimax(int state, int depth){
 				
 
 				if(row + i < n && board[row+i][column] == 'W' && !stop_one){
-					//setScoreDelta
+					//TODO: setScoreDelta
 					float scoreDelta;
 					score_movements.push_back(new triple(scoreDelta,row+i,column));
 					
@@ -86,7 +89,7 @@ float bot::expectiminimax(int state, int depth){
 					stop_one = true;
 				}
 				if(row - i >= 0 && board[row-i][column] == 'W' && !stop_two){
-					//setScoreDelta
+					//TODO: setScoreDelta
 					float scoreDelta;
 					score_movements.push_back(new triple(scoreDelta,row-i,column));
 					
@@ -181,7 +184,7 @@ float bot::expectiminimax(int state, int depth){
 		for(unordered_set<int>::const_iterator it = unvisited_cells.begin();it!= unvisited_cells.end();it++){
 			int row =  (*it) / n;
 			int col = (*it) % n;
-			//Set scoreDelta
+			//TODO: Set scoreDelta
 			float scoreDelta;
 			score_movements.push_back(new triple(scoreDelta,row,col));
 		}

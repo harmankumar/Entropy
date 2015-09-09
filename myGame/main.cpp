@@ -15,15 +15,18 @@ int main(){
 			int row,col;
 			char C;
 			cin>>row>>col>>C;
-			playAsOrder(C,row,col);
+			mBot.playAsOrder(C,row,col);
+            if(row == 4 && col== 0 )
+                
 			i++;
 		}
 		else{
 			char C;
 			cin>>C;
-			playAsChaos(C);
+			mBot.playAsChaos(C);
 			i++;
 		}
+		mBot.printBoard();
 	}
 	return 0;
 }

@@ -18,7 +18,7 @@ using namespace std;
 */
 
 int boardsize;
-vector< vector<char> > board(5 , vector<char>(5,'W'));
+vector< vector<char> > board(5 , vector<char>(5,'-'));
 
 int diff(int xini, int yini, int xfin, int yfin, char color)
 {
@@ -39,7 +39,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 		// Odd Pal.
 		while((i-j >= 0) && (j+i < boardsize))
 		{
-			if((board[xini][i-j] == board[xini][i+j]) && (board[xini][i-j] != 'W'))
+			if((board[xini][i-j] == board[xini][i+j]) && (board[xini][i-j] != '-'))
 				difference -= 2*j+1;
 			else
 				break;
@@ -56,7 +56,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 				j=1;
 				while(i-j >= 0 && i+j+1 < boardsize)
 				{
-					if((board[xini][i-j] == board[xini][i+j+1]) && (board[xini][i-j] != 'W'))
+					if((board[xini][i-j] == board[xini][i+j+1]) && (board[xini][i-j] != '-'))
 						difference -= 2*j+2;
 					else 
 						break;
@@ -75,7 +75,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 				j=1;
 				while(i-j-1 >= 0 && i+j < boardsize)
 				{
-					if((board[xini][i-j-1] == board[xini][i+j]) && (board[xini][i-j-1] != 'W'))
+					if((board[xini][i-j-1] == board[xini][i+j]) && (board[xini][i-j-1] != '-'))
 						difference -= 2*j+2;
 					else 
 						break;
@@ -95,7 +95,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 
 		while((i-j >= 0) && (j+i < boardsize))
 		{
-			if((board[xfin][i-j] == board[xfin][i+j]) && (board[xfin][i-j] != 'W'))
+			if((board[xfin][i-j] == board[xfin][i+j]) && (board[xfin][i-j] != '-'))
 				difference += 2*j+1;
 			else
 				break;
@@ -111,7 +111,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 				j=1;
 				while(i-j >= 0 && i+j+1 < boardsize)
 				{
-					if((board[xfin][i-j] == board[xfin][i+j+1]) && (board[xfin][i-j] != 'W'))
+					if((board[xfin][i-j] == board[xfin][i+j+1]) && (board[xfin][i-j] != '-'))
 						difference += 2*j+2;
 					else 
 						break;
@@ -130,7 +130,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 				j=1;
 				while(i-j-1 >= 0 && i+j < boardsize)
 				{
-					if((board[xfin][i-j-1] == board[xfin][i+j]) && (board[xfin][i-j-1] != 'W'))
+					if((board[xfin][i-j-1] == board[xfin][i+j]) && (board[xfin][i-j-1] != '-'))
 						difference += 2*j+2;
 					else 
 						break;
@@ -219,7 +219,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 			difference += sumup;
 		}
 
-		board[xfin][yfin] = 'W';*/
+		board[xfin][yfin] = '-';*/
 
 
 	}
@@ -233,7 +233,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 		// Odd Pal.
 		while((i-j >= 0) && (j+i < boardsize))
 		{
-			if((board[i-j][yini] == board[i+j][yini]) && (board[i-j][yini] != 'W'))
+			if((board[i-j][yini] == board[i+j][yini]) && (board[i-j][yini] != '-'))
 				difference -= 2*j+1;
 			else
 				break;
@@ -249,7 +249,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 				j=1;
 				while(i-j >= 0 && i+j+1 < boardsize)
 				{
-					if((board[i-j][yini] == board[i+j+1][yini]) && (board[i-j][yini] != 'W'))
+					if((board[i-j][yini] == board[i+j+1][yini]) && (board[i-j][yini] != '-'))
 						difference -= 2*j+2;
 					else 
 						break;
@@ -268,7 +268,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 				j=1;
 				while(i-j-1 >= 0 && i+j < boardsize)
 				{
-					if((board[i-j-1][yini] == board[i+j][yini]) && (board[i-j-1][yini] != 'W'))
+					if((board[i-j-1][yini] == board[i+j][yini]) && (board[i-j-1][yini] != '-'))
 						difference -= 2*j+2;
 					else 
 						break;
@@ -285,7 +285,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 		j = 1;
 		while((i-j >= 0) && (j+i < boardsize))
 		{
-			if((board[i-j][yfin] == board[i+j][yfin]) && (board[i-j][yfin] != 'W'))
+			if((board[i-j][yfin] == board[i+j][yfin]) && (board[i-j][yfin] != '-'))
 				difference += 2*j+1;
 			else
 				break;
@@ -301,7 +301,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 				j=1;
 				while(i-j >= 0 && i+j+1 < boardsize)
 				{
-					if((board[i-j][yfin] == board[i+j+1][yfin]) && (board[i-j][yfin] != 'W'))
+					if((board[i-j][yfin] == board[i+j+1][yfin]) && (board[i-j][yfin] != '-'))
 						difference += 2*j+2;
 					else 
 						break;
@@ -320,7 +320,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 				j=1;
 				while(i-j-1 >= 0 && i+j < boardsize)
 				{
-					if((board[i-j-1][yfin] == board[i+j][yfin]) && (board[i-j-1][yfin] != 'W'))
+					if((board[i-j-1][yfin] == board[i+j][yfin]) && (board[i-j-1][yfin] != '-'))
 						difference += 2*j+2;
 					else 
 						break;
@@ -409,7 +409,7 @@ int diff(int xini, int yini, int xfin, int yfin, char color)
 			difference += sumleft;
 		}
 
-		board[xfin][yfin] = 'W';
+		board[xfin][yfin] = '-';
 
 	}
 
@@ -423,7 +423,7 @@ int main()
 	// Init the board
 	for(int i=0;i<5;i++){
 		for(int j=0;j<5;j++)
-			board[i][j] = 'W';
+			board[i][j] = '-';
 	}
 	board[1][2] = board[1][4] = 'B';
 	board[3][1] = board[3][2] = board[3][3] = board[3][4] = 'B';

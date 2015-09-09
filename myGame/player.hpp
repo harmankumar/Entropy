@@ -7,16 +7,16 @@
 #include <limits>
 using namespace std;
 
-#define INF numeric_limits<float>::max()
-#define MINF numeric_limits<float>::min()
+#define INF 5000000.0
+#define MINF -5000000.0
 
 struct triple{
-	float score;int row;int column;
-	triple(float a,int b,int c){
-		score = a;row = b;column = c;
+	int first;int second;int third;
+	triple(int a,int b,int c){
+		first = a;second = b;third = c;
 	}
 	void print(){
-		printf("%f %d %d\n",score,row,column);
+		printf("%d %d %d\n",first,second,third);
 	}
 };
 
@@ -24,7 +24,7 @@ struct triple{
 struct comparator_structure{
 	bool operator()(triple* a,triple* b){
 		if(a && b){
-			if(a->score > b->score)
+			if(a->first > b->first)
 				return true;
 			else
 				return false;
@@ -39,19 +39,23 @@ struct comparator_structure{
 
 class bot{
 	int n;
+	int errScore;
 	vector<vector<char> > board; // The board
 	vector<int> colors; // Number of tiles left of valid colors
-	vector<pair<int,int> > tilePos; //The position of tiles.
+	
 	bool order; //Whether order or chaos
 	int maxdepth; //The max depth to which we can go(0,maxdepth), both inclusive.
 	int totaltilesleft; // number of tiles left
 	char tileToMinNode;
 	int score;
 	unordered_set<int> unvisited_cells;
+	unordered_set<int> visited_cells;
 	comparator_structure comparison;
-	void setScore(){
-	// TODO: RESET SCORE	
-	}
+	int movedTile;
+	
+	int getscore(string s);
+	int diff_order(int xini,int yini,int xfin,int yfin);
+	int diff_chaos(int x,int y,char color);
 	
 	//Book keeping for maintaining actions
 	
@@ -64,22 +68,36 @@ class bot{
 
 public:
 	
-	bot(int n,bool ord):board(n,vector<char>(n,'W')){
+	bot(int n,bool ord):board(n,vector<char>(n,'-')){
 		order = ord; // Unnecessary ? 
 		this->n = n;
+		movedTile = -1;
 		colors.resize(n,n);
 		maxdepth = 3; // Vary this to get different depths.
 		totaltilesleft = 25;
-		tileToMinNode = 'W';
+		tileToMinNode = '-';
 		score = 0;
 		initx=inity=finx=finy = posx=posy = -1;
 		for(int i=0;i<n*n;i++)
 			unvisited_cells.insert(i);
+		errScore = numeric_limits<int>::max();
 	}
 	
 	float expectiminimax(int state,int depth);	
 	float utilityFunction();
 	void playAsOrder(char TileUsedByChaos,int row,int col);
 	void playAsChaos(char TileColorGiven);
+	void printBoard(){
+		for(int i=0;i<n;i++){
+			for(int j=0;j<n;j++){
+				if(board[i][j] == '-')
+					cout<<'-';
+				else
+					cout<<board[i][j];
+				cout<<" ";
+			}
+			cout<<"\n";
+		}
+	}
 };
 #endif

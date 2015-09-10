@@ -12,19 +12,26 @@ int main(){
 	bot mBot(N,order);
 	while(i<N*N){
 		if(order){
-			int row,col;
-			char C;
-			cin>>row>>col>>C;
-			mBot.playAsOrder(C,row,col);
-            if(row == 4 && col== 0 )
-                
-			i++;
+            int row,col;
+            char C;
+            cin>>row>>col>>C;
+            mBot.playAsOrder(C,row,col);
+            i++;
 		}
 		else{
 			char C;
-			cin>>C;
-			mBot.playAsChaos(C);
-			i++;
+            int initx,inity,finx,finy;
+            if(i==0){
+                cin>>C;
+                mBot.playAsChaos(C);
+                
+            }
+            else{
+                cin>>initx>>inity>>finx>>finy>>C;
+                mBot.playAsChaos(C,initx,inity,finx,finy);
+            }
+            i++;
+			
 		}
 		mBot.printBoard();
 	}

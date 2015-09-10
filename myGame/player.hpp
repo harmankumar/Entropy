@@ -56,6 +56,8 @@ class bot{
 	int getscore(string s);
 	int diff_order(int xini,int yini,int xfin,int yfin);
 	int diff_chaos(int x,int y,char color);
+    
+    bool debug_flag;
 	
 	//Book keeping for maintaining actions
 	
@@ -73,7 +75,10 @@ public:
 		this->n = n;
 		movedTile = -1;
 		colors.resize(n,n);
-		maxdepth = 3; // Vary this to get different depths.
+        if(order)
+            maxdepth = 3; // Vary this to get different depths.
+        else
+            maxdepth = 4;
 		totaltilesleft = 25;
 		tileToMinNode = '-';
 		score = 0;
@@ -81,12 +86,14 @@ public:
 		for(int i=0;i<n*n;i++)
 			unvisited_cells.insert(i);
 		errScore = numeric_limits<int>::max();
+        debug_flag = false;
 	}
 	
 	float expectiminimax(int state,int depth);	
 	float utilityFunction();
 	void playAsOrder(char TileUsedByChaos,int row,int col);
 	void playAsChaos(char TileColorGiven);
+    void playAsChaos(char TileColorGiven,int initx,int inity,int finx,int finy);
 	void printBoard(){
 		for(int i=0;i<n;i++){
 			for(int j=0;j<n;j++){
@@ -99,5 +106,8 @@ public:
 			cout<<"\n";
 		}
 	}
+	void moveTile(int initx,int inity,int finx,int finy);
+    void placeTile(int posx,int posy,char C);
+    void removeTile(int posx,int posy);
 };
 #endif

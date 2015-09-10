@@ -10,18 +10,49 @@ float bot::utilityFunction(){
 	return theMagicValue;
 }
 
+void bot::moveTile(int initx, int inity, int finx, int finy){
+    if(initx == finx && inity == finy)
+        return;
+    char tile = board[initx][inity];
+    board[initx][inity] = '-';
+    board[finx][finy] = tile;
+    int ii = (n*finx) + finy;
+    int jj = (n*initx) + inity;
+    visited_cells.erase(jj);
+    visited_cells.insert(ii);
+    
+    unvisited_cells.insert(jj);
+    unvisited_cells.erase(ii);
+}
+
+void bot::placeTile(int posx, int posy, char C){
+    if(board[posx][posy] != '-')
+        return;
+    board[posx][posy] = C;
+    int idx = C - 65;
+    colors[idx]--;
+    totaltilesleft--;
+    int ii = (posx*n) + posy;
+    visited_cells.insert(ii);
+    unvisited_cells.erase(ii);
+}
+
+void bot::removeTile(int posx, int posy){
+    if(board[posx][posy] == '-')
+        return;
+    int idx = board[posx][posy] - 65;
+    colors[idx]++;
+    totaltilesleft++;
+    board[posx][posy] = '-';
+    int ii = n*posx + posy;
+    visited_cells.erase(ii);
+    unvisited_cells.insert(ii);
+}
 void bot::playAsOrder(char TileUsedByChaos,int row,int col){
 	//UPDATE SCORE 
 	score += diff_chaos(row,col,TileUsedByChaos);
-	
-	unvisited_cells.erase(n*row + col);
-	visited_cells.insert(n*row + col);
-	
-	int idx = TileUsedByChaos - 65;
-	
-	colors[idx]--;
-	totaltilesleft--;
-	board[row][col] = TileUsedByChaos;
+    
+    placeTile(row, col, TileUsedByChaos);
 	
 	//cout<<score<<"\n";
 	initx = inity = -1;
@@ -30,13 +61,7 @@ void bot::playAsOrder(char TileUsedByChaos,int row,int col){
     
 	score += diff_order(initx,inity,finx,finy);
 	
-	board[finx][finy] = board[initx][inity];
-	board[initx][inity] = '-';
-	
-	unvisited_cells.erase(n*finx + finy);
-	unvisited_cells.insert(n*initx + inity);
-	visited_cells.erase(n*initx + inity);
-	visited_cells.insert(n*finx + finy);
+    moveTile(initx, inity, finx, finy);
 	
 	printf("%d %d %d %d\n",initx,inity,finx,finy);
     
@@ -44,16 +69,26 @@ void bot::playAsOrder(char TileUsedByChaos,int row,int col){
 
 void bot::playAsChaos(char TileColorGiven){
 	tileToMinNode = TileColorGiven;
+    
+    posx = posy = -1;
 	
-	float dummy = expectiminimax(2,0);
+    float dummy = expectiminimax(2,0);
 	
 	score += diff_chaos(posx,posy,TileColorGiven);
+    placeTile(posx, posy, TileColorGiven);
 	
-	board[posx][posy] = TileColorGiven;
-	unvisited_cells.erase(n*posx + posy);
-	visited_cells.insert(n*posx + posy);
-
-	printf("%d %d\n",posx,posy);
+    printf("%d %d\n",posx,posy);
+}
+void bot::playAsChaos(char TileColorGiven,int initx,int inity,int finx,int finy){
+    score += diff_order(initx,inity,finx,finy);
+    
+    moveTile(initx, inity, finx, finy);
+    
+    debug_flag = true;
+    maxdepth = 4;
+    playAsChaos(TileColorGiven);
+    
+    
 }
 
 float bot::expectiminimax(int state, int depth){
@@ -62,7 +97,8 @@ float bot::expectiminimax(int state, int depth){
 		return utilityFunction();
 	
 	if(state == 0){ 
-		// This is max node
+        
+        // This is max node
 		
 		float globalmax = MINF;
 		vector<triple*> score_movements;
@@ -70,8 +106,8 @@ float bot::expectiminimax(int state, int depth){
 		for(unordered_set<int>::const_iterator ii = visited_cells.begin();ii != visited_cells.end();ii++){			
 				int row = (*ii) / n;
 				int column = (*ii) % n;
-				
-				int i = 0;
+                score_movements.push_back(new triple(0,(*ii),(*ii)));
+				int i = 1;
 				while(column + i < n){
 					if(board[row][column+i] == '-'){
 						int scoreDelta = diff_order(row,column,row,column+i);
@@ -83,7 +119,7 @@ float bot::expectiminimax(int state, int depth){
 						break;
 					}
 				}
-				i = 0;
+				i = 1;
 				while(column - i >=0){
 					if(board[row][column - i] =='-'){
 						int scoreDelta = diff_order(row,column,row,column-i);
@@ -97,7 +133,7 @@ float bot::expectiminimax(int state, int depth){
 						break;
 					}
 				}
-				i = 0;
+				i = 1;
 				while(row + i < n){
 					if(board[row+i][column]=='-'){
 						int scoreDelta = diff_order(row,column,row+i,column);
@@ -108,7 +144,7 @@ float bot::expectiminimax(int state, int depth){
 						break;
 					}
 				}
-				i = 0;
+				i = 1;
 				while(row - i >= 0){
 					if(board[row-i][column] == '-'){
 						int scoreDelta = diff_order(row,column,row-i,column);
@@ -136,40 +172,29 @@ float bot::expectiminimax(int state, int depth){
 				//Memory management: score_management[i] no longer needed. Deleted. 
 				delete score_movements[i];
 				//End Memory management
+                
+                moveTile(row, column, newrow, newcol);
 				
-				visited_cells.erase(n*row + column);
-				visited_cells.insert(n*newrow + newcol);
-				
-				board[newrow][newcol] = board[row][column];
-				unvisited_cells.erase(newrow*n + newcol);
-				board[row][column] = '-';
-				unvisited_cells.insert(row*n + column);
-				
-				int localstate = state;
+                int localstate = state;
 				state  = (state + 1)%3;
 				float tempval = expectiminimax(state,depth+1);
 				
-                
 				//Restoring board
 
 				state = localstate;
 				score -= scoreDelta;
 				
-				visited_cells.erase(n*newrow + newcol);
-				visited_cells.insert(n*row + column);
-				
-				board[row][column] = board[newrow][newcol];
-				unvisited_cells.erase(row*n + column);
-				board[newrow][newcol] = '-';
-				unvisited_cells.insert(newrow*n + newcol);
-
+                moveTile(newrow,newcol,row,column);
+    
 				if(tempval > globalmax){
 					// Store action that lead to this state
 					globalmax = tempval;
-					initx = row;
-					inity = column;
-					finx = newrow;
-					finy = newcol;	 
+                    if(depth == 0){
+                        initx = row;
+                        inity = column;
+                        finx = newrow;
+                        finy = newcol;
+                    }
 				}
                 
 			}		
@@ -181,27 +206,20 @@ float bot::expectiminimax(int state, int depth){
 		float expectedvalue = 0.0;
 		for(int i=0;i<5;i++){
 			float prob = float(colors[i]) / totaltilesleft;
-			colors[i]--;
-			totaltilesleft--;
 			tileToMinNode = 65+i; //given color.
 			int localstate = state;
 			state = (state + 1)%3;
             if(prob>0.0001){
 				expectedvalue += prob*expectiminimax(state,depth+1);
-                if(expectedvalue > 1000.0){
-                    cout<<"Warning expected value too large. ";
-                }
-                    
+             state = localstate;
             }
-            state = localstate;
-			colors[i]++;
-			totaltilesleft++;
 		}
 		return expectedvalue;
 
 	}
 
-	else{
+	else if(state == 2){
+
 		//This is min node
 		float globalmin = INF;
 		
@@ -210,49 +228,51 @@ float bot::expectiminimax(int state, int depth){
 			int row =  (*it) / n;
 			int col = (*it) % n;
 			//TODO: Set scoreDelta
-			int scoreDelta = diff_chaos(row,col,tileToMinNode);
+            int scoreDelta = diff_chaos(row,col,tileToMinNode);
 			score_movements.push_back(new triple(scoreDelta,row,col));
 		}
 		//TODO: Order moves: sort(score_movements.begin(),score_movements.end(),comparison)
+		//TODO: reverse(score_movements.begin(),score_movements.end())
 		for(int i=0;i<score_movements.size();i++){
 			//make movement
 			int row = score_movements[i]->second;
 			int col = score_movements[i]->third;
-			float scoreDelta = score_movements[i]->first;
+			int scoreDelta = score_movements[i]->first;
 			
 			//Memory management: score_management[i] no longer needed. Deleted. 
 			delete score_movements[i];
 			//End Memory management
 			
 			score+=scoreDelta;
-			board[row][col] = tileToMinNode;
-			unvisited_cells.erase(n*row + col);
-			visited_cells.insert(n*row + col);
-
-			int localstate = state;
+            placeTile(row,col,tileToMinNode);
+			
+            int localstate = state;
 			state = (state+1)%3;	
-			float localmin = expectiminimax(state,depth+1);
+			float localmin = (float) expectiminimax(state,depth+1);
 			state = localstate;
-			//Restore board
-			board[row][col] = '-';
-			unvisited_cells.insert(n*row + col);
-			visited_cells.erase(n*row + col);
+			
+            //Restore board
+            removeTile(row, col);
 			score-=scoreDelta;
-			
-			
+            
+            
 			if(localmin < globalmin){
 				globalmin = localmin;
-				tilecolor = tileToMinNode;
-				posx = row;
-				posy = col;
+                if(depth==0){
+                    tilecolor = tileToMinNode;
+                    posx = row;
+                    posy = col;
+                }
+                
 			}
 
 		}
-        if(globalmin > 1000.0)
-            cout<<"Warning Large Values\n";
+        
 		return globalmin;
 	}
-
+    else{
+        return MAXFLOAT;
+    }
 }
 
 
@@ -296,7 +316,9 @@ int bot::getscore(string s){
 
 int bot::diff_order(int xini, int yini, int xfin, int yfin){
 	int difference = 0;
-	char color = board[xini][yini];
+    if( (yfin == yini) && (xfin==xini))	// Trivial.
+        return difference;
+    char color = board[xini][yini];
 	if(color == '-'){
 		cout<<"Input fault. Idiot " <<xini<<" "<<yini<<"\n";
 		return errScore;
@@ -310,11 +332,8 @@ int bot::diff_order(int xini, int yini, int xfin, int yfin){
 		return errScore;
 	}
 	string s;
-	if( (yfin == yini) && (xfin==xini))	// Trivial.
-		return difference;
+	
 
-	if( (yfin != yini) && (xfin != xini))	// Not a Possible move
-		return errScore;
 
 	if(yfin == yini)	// Column Movement
 	{

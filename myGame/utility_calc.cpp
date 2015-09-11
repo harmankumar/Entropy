@@ -5,42 +5,6 @@ using namespace std;
 int boardsize;
 vector< vector<char> > board(5 , vector<char>(5,'-'));
 
-// For the relative positions of similar tiles.
-int scattering()
-{
-	vector< vector<int> > mapping;
-	mapping.resize(5);
-	int scat_coeff = 0;
-	// Getting the loations of the tiles, this could be improved by maintaining this map.
-	for(int i=0; i<boardsize; i++)
-		for(int j=0; j<boardsize; j++)
-			if(board[i][j] != '-')
-				(mapping[board[i][j]-65]).push_back(boardsize*i + j);
-
-		
-	for(int i=0; i<boardsize; i++)
-	{
-		for(int j=0; j<(mapping[i]).size(); j++)
-		{
-			for(int k=j+1; k<(mapping[i]).size(); k++)
-			{
-				scat_coeff += (abs(mapping[i][j]/boardsize - mapping[i][k]/boardsize) );
-				scat_coeff += (abs(mapping[i][j]%boardsize - mapping[i][k]%boardsize) );
-			}
-		}
-	}
-	cout<< scat_coeff;
-	return scat_coeff;
-
-}
-
-float calc_util()
-{
-	// Assuming the colors are A, B, C, D, E
-
-	scattering();	// Sum of all pairs of tiles of the same colour.
-
-}
 int getscore(string s)
 {
 	int ssize = s.size();
@@ -77,6 +41,88 @@ int getscore(string s)
 	}
 	return score;
 }
+int tentative_palindrome_count()
+{
+	int tentative_delta = 0;
+
+	for(int i=0; i<boardsize; i++)
+	{
+		for(int j=0; j<boardsize; j++)
+		{
+			if(board[i][j] == '-')	// Empty Location Detected.
+			{
+				for(int l=0; l<5; l++)	// Iterating through the colors and getting the score.
+				{
+					int addscore_col = 0;
+
+					string row, col;
+					while(k<boardsize)
+					{
+						row += board[i][k];
+						col += board[k][j];
+						k++;
+					}
+
+					addscore_col -= getscore(row);
+					addscore_col -= getscore(col)
+
+					row.resize(0);
+					col.resize(0);
+					char color = 'A'+l;
+
+					while(k<boardsize)
+					{
+						row += board[i][k];
+						col += board[k][j];
+						k++;
+					}
+
+					addscore_col += getscore(row);
+					addscore_col += getscore(col)
+
+					tentative_delta += addscore_col;	// Multiply with the probability of the color appearing.
+				}
+				board[i][j] = '-'	// Restoring the board.
+			}
+		}
+	}
+}
+// For the relative positions of similar tiles.
+int scattering()
+{
+	vector< vector<int> > mapping;
+	mapping.resize(5);
+	int scat_coeff = 0;
+	// Getting the loations of the tiles, this could be improved by maintaining this map.
+	for(int i=0; i<boardsize; i++)
+		for(int j=0; j<boardsize; j++)
+			if(board[i][j] != '-')
+				(mapping[board[i][j]-65]).push_back(boardsize*i + j);
+
+		
+	for(int i=0; i<boardsize; i++)
+	{
+		for(int j=0; j<(mapping[i]).size(); j++)
+		{
+			for(int k=j+1; k<(mapping[i]).size(); k++)
+			{
+				scat_coeff += (abs(mapping[i][j]/boardsize - mapping[i][k]/boardsize) );
+				scat_coeff += (abs(mapping[i][j]%boardsize - mapping[i][k]%boardsize) );
+			}
+		}
+	}
+	cout<< scat_coeff;
+	return scat_coeff;
+}
+
+
+float calc_util()
+{
+	// Assuming the colors are A, B, C, D, E
+	//scattering();	// Sum of all pairs of tiles of the same colour.
+	tentative_palindrome_count();
+}
+
 
 int diff(int xini, int yini, int xfin, int yfin, char color)
 {

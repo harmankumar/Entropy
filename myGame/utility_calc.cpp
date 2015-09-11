@@ -54,8 +54,8 @@ int tentative_palindrome_count()
 				for(int l=0; l<5; l++)	// Iterating through the colors and getting the score.
 				{
 					int addscore_col = 0;
-
 					string row, col;
+					int k=0; 
 					while(k<boardsize)
 					{
 						row += board[i][k];
@@ -64,25 +64,30 @@ int tentative_palindrome_count()
 					}
 
 					addscore_col -= getscore(row);
-					addscore_col -= getscore(col)
+					addscore_col -= getscore(col);
 
 					row.resize(0);
 					col.resize(0);
 					char color = 'A'+l;
-
+					int colrow = -1, colcol = -1;	// Tiles of the same color in its row and column.
 					while(k<boardsize)
 					{
+						if(board[i][k] == color)
+							colrow++;
+						if(board[k][j] == color)
+							colcol++;
 						row += board[i][k];
 						col += board[k][j];
 						k++;
 					}
+					// Use the variables colrow and colcol somehow.
 
 					addscore_col += getscore(row);
-					addscore_col += getscore(col)
+					addscore_col += getscore(col);
 
 					tentative_delta += addscore_col;	// Multiply with the probability of the color appearing.
 				}
-				board[i][j] = '-'	// Restoring the board.
+				board[i][j] = '-';	// Restoring the board.
 			}
 		}
 	}

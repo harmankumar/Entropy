@@ -6,14 +6,24 @@ using namespace std;
 
 float bot::utilityFunction(){
 	// DO SOME MAGIC HERE
-	float theMagicValue = score;
+	float theMagicValue = ((float) score / 150.0 );
+    //theMagicValue -= ((float) scattering / 500);
+    if(theMagicValue >=2.0)
+        cout<<"Wrong bound you have "<<score<<" "<<scattering<<" "<<theMagicValue <<"\n";
 	return theMagicValue;
+}
+void bot::setDepth(int depth){
+    maxdepth = depth;
 }
 
 void bot::moveTile(int initx, int inity, int finx, int finy){
     if(initx == finx && inity == finy)
         return;
     char tile = board[initx][inity];
+    if(tile == '-'){
+        cout<<"Error hai bhai\n";
+        return;
+    }
     board[initx][inity] = '-';
     board[finx][finy] = tile;
     int ii = (n*finx) + finy;
@@ -23,6 +33,22 @@ void bot::moveTile(int initx, int inity, int finx, int finy){
     
     unvisited_cells.insert(jj);
     unvisited_cells.erase(ii);
+
+    int idx = tile - 65;
+    mapping[idx].erase(jj);
+    mapping[idx].insert(ii);
+    for(unordered_set<int>::const_iterator it = (mapping[idx]).begin(); it != (mapping[idx]).end();it++){
+    		int row = (*it) / n;
+    		int col = (*it) % n;
+            if(row == finx && col ==finy)
+                continue;
+    		scattering += abs(row - finx) + abs(col - finy) - abs(row - initx) - abs(col - inity);
+    }
+    if(scattering < 0){
+        printBoard();
+        
+    }
+
 }
 
 void bot::placeTile(int posx, int posy, char C){
@@ -35,6 +61,19 @@ void bot::placeTile(int posx, int posy, char C){
     int ii = (posx*n) + posy;
     visited_cells.insert(ii);
     unvisited_cells.erase(ii);
+    
+    idx = C - 65;
+    
+    for(unordered_set<int>::const_iterator it = mapping[idx].begin(); it != mapping[idx].end();it++){
+    		int row = (*it) / n;
+    		int col = (*it) % n;
+    		scattering += (abs(row - posx) + abs(col - posy));
+    }
+    mapping[idx].insert(ii);
+    if(scattering < 0){
+        printBoard();
+        
+    }
 }
 
 void bot::removeTile(int posx, int posy){
@@ -47,9 +86,22 @@ void bot::removeTile(int posx, int posy){
     int ii = n*posx + posy;
     visited_cells.erase(ii);
     unvisited_cells.insert(ii);
+
+    mapping[idx].erase(ii);
+    for(unordered_set<int>::const_iterator it = mapping[idx].begin(); it != mapping[idx].end();it++){
+    		int row = (*it) / n;
+    		int col = (*it) % n;
+    		scattering -= (abs(row - posx) + abs(col - posy));
+    }
+    if(scattering < 0){
+        printBoard();
+        
+    }
 }
 void bot::playAsOrder(char TileUsedByChaos,int row,int col){
-	//UPDATE SCORE 
+	
+	//UPDATE SCORE and INITIALIZE ALPHA and BETA
+	
 	score += diff_chaos(row,col,TileUsedByChaos);
     
     placeTile(row, col, TileUsedByChaos);
@@ -57,7 +109,7 @@ void bot::playAsOrder(char TileUsedByChaos,int row,int col){
 	//cout<<score<<"\n";
 	initx = inity = -1;
 	
-	float dummy = expectiminimax(0,0);
+	float dummy = expectiminimax(0,0,MINF,INF);
     
 	score += diff_order(initx,inity,finx,finy);
 	
@@ -68,11 +120,13 @@ void bot::playAsOrder(char TileUsedByChaos,int row,int col){
 }
 
 void bot::playAsChaos(char TileColorGiven){
+	
+	
 	tileToMinNode = TileColorGiven;
     
     posx = posy = -1;
 	
-    float dummy = expectiminimax(2,0);
+    float dummy = expectiminimax(2,0,MINF,INF);
 	
 	score += diff_chaos(posx,posy,TileColorGiven);
     placeTile(posx, posy, TileColorGiven);
@@ -85,13 +139,12 @@ void bot::playAsChaos(char TileColorGiven,int initx,int inity,int finx,int finy)
     moveTile(initx, inity, finx, finy);
     
     debug_flag = true;
-    maxdepth = 4;
     playAsChaos(TileColorGiven);
     
     
 }
 
-float bot::expectiminimax(int state, int depth){
+float bot::expectiminimax(int state, int depth,float alpha,float beta){
 
 	if(depth == maxdepth) //Base Case
 		return utilityFunction();
@@ -100,7 +153,7 @@ float bot::expectiminimax(int state, int depth){
         
         // This is max node
 		
-		float globalmax = MINF;
+		float globalmax = MINF; // globalmax = alpha;
 		vector<triple*> score_movements;
 		
 		for(unordered_set<int>::const_iterator ii = visited_cells.begin();ii != visited_cells.end();ii++){			
@@ -156,8 +209,12 @@ float bot::expectiminimax(int state, int depth){
 					}
 				}
 			}
-			//TODO: Change for move ordering : sort(score_movements.begin(),score_movements.end(),comparison)
-
+            //Terminal State check.
+            if(score_movements.size()==0)
+                return utilityFunction();
+			//TODO: Change for move ordering :
+            sort(score_movements.begin(),score_movements.end(),comparison);
+        
 
 			for (int i=0;i<score_movements.size();i++){
 				// make movement
@@ -175,20 +232,18 @@ float bot::expectiminimax(int state, int depth){
                 
                 moveTile(row, column, newrow, newcol);
 				
-                int localstate = state;
-				state  = (state + 1)%3;
-				float tempval = expectiminimax(state,depth+1);
+				
+				float localmax = expectiminimax((state+1)%3,depth+1,alpha,beta);
 				
 				//Restoring board
-
-				state = localstate;
+                
 				score -= scoreDelta;
 				
                 moveTile(newrow,newcol,row,column);
     
-				if(tempval > globalmax){
+				if(localmax > globalmax){
 					// Store action that lead to this state
-					globalmax = tempval;
+					globalmax = localmax;
                     if(depth == 0){
                         initx = row;
                         inity = column;
@@ -196,7 +251,16 @@ float bot::expectiminimax(int state, int depth){
                         finy = newcol;
                     }
 				}
-                
+                /*alpha = (alpha > globalmax) ? alpha : globalmax;
+                if(depth == 1){
+                    if(alpha > beta)
+                        return globalmax;
+                }
+                else{
+                    if(alpha >= beta)
+                        return globalmax;
+                }*/
+				
 			}		
 		return globalmax;
 	}
@@ -207,11 +271,12 @@ float bot::expectiminimax(int state, int depth){
 		for(int i=0;i<5;i++){
 			float prob = float(colors[i]) / totaltilesleft;
 			tileToMinNode = 65+i; //given color.
-			int localstate = state;
-			state = (state + 1)%3;
+            /*float upperBound = expectedvalue + boundChanceNode(i);
+            if(upperBound < alpha)
+                return expectedvalue;*/
             if(prob>0.0001){
-				expectedvalue += prob*expectiminimax(state,depth+1);
-             state = localstate;
+				expectedvalue += prob*expectiminimax((state+1)%3,depth+1,alpha,beta);
+            
             }
 		}
 		return expectedvalue;
@@ -231,9 +296,16 @@ float bot::expectiminimax(int state, int depth){
             int scoreDelta = diff_chaos(row,col,tileToMinNode);
 			score_movements.push_back(new triple(scoreDelta,row,col));
 		}
-		//TODO: Order moves: sort(score_movements.begin(),score_movements.end(),comparison)
-		//TODO: reverse(score_movements.begin(),score_movements.end())
-		for(int i=0;i<score_movements.size();i++){
+        //Terminal state check
+        if(score_movements.size()==0)
+            return utilityFunction();
+		//TODO: Order moves:
+        sort(score_movements.begin(),score_movements.end(),comparison);
+		//TODO:
+        reverse(score_movements.begin(),score_movements.end());
+		
+        
+        for(int i=0;i<score_movements.size();i++){
 			//make movement
 			int row = score_movements[i]->second;
 			int col = score_movements[i]->third;
@@ -246,10 +318,12 @@ float bot::expectiminimax(int state, int depth){
 			score+=scoreDelta;
             placeTile(row,col,tileToMinNode);
 			
-            int localstate = state;
-			state = (state+1)%3;	
-			float localmin = (float) expectiminimax(state,depth+1);
-			state = localstate;
+			
+			
+			float localmin = (float) expectiminimax((state+1)%3,depth+1,alpha,beta);
+			
+			
+			
 			
             //Restore board
             removeTile(row, col);
@@ -263,8 +337,15 @@ float bot::expectiminimax(int state, int depth){
                     posx = row;
                     posy = col;
                 }
-                
 			}
+            /*beta = (beta < globalmin)? beta:globalmin;
+            if(depth==2){
+                if(alpha > beta)
+                    return globalmin;
+            }else{
+                if(alpha>=beta)
+                    return globalmin;
+            }*/
 
 		}
         
@@ -275,7 +356,24 @@ float bot::expectiminimax(int state, int depth){
     }
 }
 
-
+float bot::boundChanceNode(int i){
+    if(i==0){
+        return epsilon;
+    }
+    else if(i < 2){
+        int tileCount = totaltilesleft;
+        for(int j = 0;j<i;j++){
+            tileCount -= colors[j];
+        }
+        return float(tileCount) / totaltilesleft * epsilon;
+    }
+    else{
+        int tileCount = 0;
+        for(int j = i;j<n;j++)
+            tileCount += colors[j];
+        return float(tileCount) / totaltilesleft * epsilon;
+    }
+}
 
 int bot::getscore(string s){
 	int ssize = s.length();

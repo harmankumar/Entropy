@@ -22,6 +22,7 @@ int main(){
 			char C;
             int initx,inity,finx,finy;
             if(i==0){
+                mBot.setDepth(5);
                 cin>>C;
                 mBot.playAsChaos(C);
                 

@@ -1,9 +1,14 @@
 #include <iostream>
-#include "player.hpp"
+
+
+#include "playerExpMinMax.hpp"
 using namespace std;
 
-
 int main(){
+
+    time_t begin_timer = time(NULL);
+    time_t now_time;
+    double seconds;
 	int N; string player;
 	cin>>N;
 	cin>>player;
@@ -23,8 +28,8 @@ int main(){
 			char C;
             int initx,inity,finx,finy;
             if(i==0){
-                mBot.setDepth(7);
                 cin>>C;
+                mBot.setDepth(7);
                 mBot.playAsChaos(C);
                 
             }

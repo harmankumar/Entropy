@@ -9,4 +9,4 @@ gamemode: single
 port: 8000
 
 # The server does not wait after this no. of connections
-max_clients: 2
+max_clients: 3

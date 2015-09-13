@@ -45,9 +45,9 @@ int tentative_palindrome_count()
 {
 	int tentative_delta = 0;
 
-	for(int i=0; i<boardsize; i++)
+	for(int i=0; i<n; i++)
 	{
-		for(int j=0; j<boardsize; j++)
+		for(int j=0; j<n; j++)
 		{
 			if(board[i][j] == '-')	// Empty Location Detected.
 			{
@@ -56,21 +56,21 @@ int tentative_palindrome_count()
 					int addscore_col = 0;
 					string row, col;
 					int k=0; 
-					while(k<boardsize)
+					while(k<n)
 					{
 						row += board[i][k];
 						col += board[k][j];
 						k++;
 					}
 
-					addscore_col -= getscore(row);
+					addscore_row -= getscore(row);
 					addscore_col -= getscore(col);
 
 					row.resize(0);
 					col.resize(0);
 					char color = 'A'+l;
 					int colrow = -1, colcol = -1;	// Tiles of the same color in its row and column.
-					while(k<boardsize)
+					while(k<n)
 					{
 						if(board[i][k] == color)
 							colrow++;
@@ -82,12 +82,12 @@ int tentative_palindrome_count()
 					}
 					// Use the variables colrow and colcol somehow.
 
-					addscore_col += getscore(row);
+					addscore_row += getscore(row);
 					addscore_col += getscore(col);
-
-					tentative_delta += addscore_col;	// Multiply with the probability of the color appearing.
+					board[i][j] = '-';
+					tentative_delta += (colors[i] / (float) totaltilesleft) * addscore_col;	// Multiply with the probability of the color appearing.
 				}
-				board[i][j] = '-';	// Restoring the board.
+					// Restoring the board.
 			}
 		}
 	}

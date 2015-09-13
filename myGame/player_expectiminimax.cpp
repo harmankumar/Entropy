@@ -1,14 +1,15 @@
 #ifndef PLAYER_CPP
 #define PLAYER_CPP
 
-#include "player.hpp"
+#include "playerExpMinMax.hpp"
 using namespace std;
 
 float bot::utilityFunction(){
 	// DO SOME MAGIC HERE
-	float theMagicValue = ((float) score / 150.0 );
-    theMagicValue -= ((float) scattering / 500.0);
-    //theMagicValue += ((float) tentative_palindrome_count() / 20.0);
+	float theMagicValue = ((float) score /*/ 150.0 */);
+    theMagicValue -= ((float) scattering / 250.0);
+    if(controlTentativePalindromes)
+    	theMagicValue += ((float) tentative_palindrome_count() / 20.0);
     theMagicValue += ((float) skipCount() / 15.0);
     return theMagicValue;
 }
@@ -105,8 +106,11 @@ void bot::playAsOrder(char TileUsedByChaos,int row,int col){
 	score += diff_chaos(row,col,TileUsedByChaos);
     
     placeTile(row, col, TileUsedByChaos);
+	if(totaltilesleft<=17)
+		controlTentativePalindromes = true;
+	if(totaltilesleft<8)
+		controlTentativePalindromes = false;
 	
-	//cout<<score<<"\n";
 	initx = inity = -1;
 	
 	float dummy = expectiminimax(0,0,MINF,INF);
@@ -130,7 +134,11 @@ void bot::playAsChaos(char TileColorGiven){
 	
 	score += diff_chaos(posx,posy,TileColorGiven);
     placeTile(posx, posy, TileColorGiven);
-	
+	if(totaltilesleft<=15)
+		controlTentativePalindromes = true;
+	if(totaltilesleft<8)
+		controlTentativePalindromes = false;
+    
     printf("%d %d\n",posx,posy);
 }
 void bot::playAsChaos(char TileColorGiven,int initx,int inity,int finx,int finy){
@@ -563,53 +571,49 @@ int bot::tentative_palindrome_count(){
 
 	int tentative_delta = 0;
 
-	for(int i=0; i<n; i++)
-	{
-		for(int j=0; j<n; j++)
+	for(unordered_set<int>::const_iterator it = unvisited_cells.begin();it!= unvisited_cells.end();it++){
+		int i = (*it) / n;
+		int j = (*it) % n;
+		for(int l=0; l<5; l++)	// Iterating through the colors and getting the score.
 		{
-			if(board[i][j] == '-')	// Empty Location Detected.
+			int addscore_col = 0;
+            int addscore_row = 0;
+			string row, col;
+			int k=0; 
+			while(k<n)
 			{
-				for(int l=0; l<5; l++)	// Iterating through the colors and getting the score.
-				{
-					int addscore_col = 0;
-                    int addscore_row = 0;
-					string row, col;
-					int k=0; 
-					while(k<n)
-					{
-						row += board[i][k];
-						col += board[k][j];
-						k++;
-					}
-
-					addscore_row -= getscore(row);
-					addscore_col -= getscore(col);
-
-					row.resize(0);
-					col.resize(0);
-					char color = 'A'+l;
-					int colrow = -1, colcol = -1;	// Tiles of the same color in its row and column.
-					while(k<n)
-					{
-						if(board[i][k] == color)
-							colrow++;
-						if(board[k][j] == color)
-							colcol++;
-						row += board[i][k];
-						col += board[k][j];
-						k++;
-					}
-					// Use the variables colrow and colcol somehow.
-
-					addscore_row += getscore(row);
-					addscore_col += getscore(col);
-					board[i][j] = '-';
-					tentative_delta += (colors[i] / (float) totaltilesleft) * addscore_col;	// Multiply with the probability of the color appearing.
-				}
-					// Restoring the board.
+				row += board[i][k];
+				col += board[k][j];
+				k++;
 			}
+
+			addscore_row -= getscore(row);
+			addscore_col -= getscore(col);
+
+			row.resize(0);
+			col.resize(0);
+			char color = 'A'+l;
+			int colrow = -1, colcol = -1;	// Tiles of the same color in its row and column.
+			while(k<n)
+			{
+				if(board[i][k] == color)
+					colrow++;
+				if(board[k][j] == color)
+					colcol++;
+				row += board[i][k];
+				col += board[k][j];
+				k++;
+			}
+			// Use the variables colrow and colcol somehow.
+
+			addscore_row += getscore(row) + colrow;
+			addscore_col += getscore(col) + colcol;
+			board[i][j] = '-'; 			// Restoring the board.
+			tentative_delta += (colors[i] / (float) totaltilesleft) * addscore_col;	// Multiply with the probability of the color appearing.
 		}
-	}
+			
+	}	
+	
     return tentative_delta;
 }
 int bot::skipCount(){

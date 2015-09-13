@@ -120,6 +120,8 @@ public:
     void placeTile(int posx,int posy,char C);
     void removeTile(int posx,int posy);
     void setDepth(int depth);
+    int tentative_palindrome_count();
+    int skipCount();
     
 };
 #endif

@@ -186,8 +186,6 @@ float bot::expectiminimax(int state, int depth,float alpha,float beta){
 						int scoreDelta = diff_order(row,column,row,column-i);
 						if(scoreDelta != errScore)
 							score_movements.push_back(new triple(scoreDelta,(*ii),n*row + column-i));
-						else
-							cout<<"hey\n";
 						i++;
 					}
 					else{
@@ -330,11 +328,7 @@ float bot::expectiminimax(int state, int depth,float alpha,float beta){
 			score+=scoreDelta;
             placeTile(row,col,tileToMinNode);
 			
-			
-			
 			float localmin = (float) expectiminimax((state+1)%3,depth+1,alpha,beta);
-			
-			
 			
 			
             //Restore board
@@ -372,7 +366,7 @@ float bot::expectiminimax(int state, int depth,float alpha,float beta){
     }
 }
 
-float bot::boundChanceNode(int i){
+/*float bot::boundChanceNode(int i){
     if(i==0){
         return epsilon;
     }
@@ -389,7 +383,7 @@ float bot::boundChanceNode(int i){
             tileCount += colors[j];
         return float(tileCount) / totaltilesleft * epsilon;
     }
-}
+}*/
 
 int bot::getscore(string s){
 	int ssize = s.length();
